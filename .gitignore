@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.egg-info/
+
+# Node / React
+node_modules/
+build/
+dist/
+.env.local
+.env.production
+
+# Docker
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
