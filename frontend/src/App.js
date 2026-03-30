@@ -7,13 +7,13 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Minimal Instagram Viewer</h1>
+        <h1>📷 Clinsta</h1>
       </header>
       <main className="app-main">
         <PostList />
       </main>
       <footer className="app-footer">
-        <span>Distraction-free feed • No reels • No suggestions</span>
+        Distraction-free • No ads • No reels • No suggestions
       </footer>
     </div>
   );

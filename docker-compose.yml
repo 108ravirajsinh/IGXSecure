@@ -3,7 +3,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: minimal-instagram-backend
+    container_name: clinsta-backend
     ports:
       - "8000:8000"
     restart: unless-stopped
@@ -12,11 +12,9 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: minimal-instagram-frontend
+      args:
+        - REACT_APP_API_URL=http://localhost:8000
+    container_name: clinsta-frontend
     ports:
       - "3000:3000"
-    environment:
-      # This is what the React app will use at runtime.
-      # Do not hardcode in code; override per environment (e.g., cloud host).
-      - REACT_APP_API_URL=http://localhost:8000
     restart: unless-stopped

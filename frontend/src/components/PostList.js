@@ -14,12 +14,12 @@ function PostList() {
       try {
         const response = await fetch(`${apiBaseUrl}/posts`);
         if (!response.ok) {
-          throw new Error(`Failed to fetch posts: ${response.status}`);
+          throw new Error(`Server responded with status ${response.status}`);
         }
         const data = await response.json();
         setPosts(data);
       } catch (err) {
-        setError(err.message || "Unexpected error");
+        setError(err.message || "Could not load posts. Is the backend running?");
       } finally {
         setLoading(false);
       }
@@ -29,15 +29,29 @@ function PostList() {
   }, []);
 
   if (loading) {
-    return <div className="status-message">Loading feed...</div>;
+    return (
+      <div className="loading-wrapper">
+        <div className="spinner" role="status" aria-label="Loading" />
+        <span>Loading feed...</span>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="status-message error">Error: {error}</div>;
+    return (
+      <div className="error-wrapper">
+        <span className="error-icon">⚠️</span>
+        <span>{error}</span>
+      </div>
+    );
   }
 
   if (!posts.length) {
-    return <div className="status-message">No posts available.</div>;
+    return (
+      <div className="empty-wrapper">
+        <p>No posts yet. Add some to get started.</p>
+      </div>
+    );
   }
 
   return (
