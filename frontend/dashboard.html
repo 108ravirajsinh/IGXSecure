@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IGXSecure — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css" />
+  <style>
+    body { display: flex; flex-direction: column; min-height: 100dvh; }
+
+    /* ── Header ── */
+    .app-header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(15,17,23,0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.25rem;
+      height: 54px;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .header-logo {
+      display: flex; align-items: center; gap: 0.45rem;
+      font-weight: 700; font-size: 0.95rem; color: var(--text);
+      text-decoration: none;
+    }
+    .header-logo svg { color: var(--accent); }
+    .header-status {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.72rem; color: var(--text-faint);
+    }
+    .header-actions {
+      margin-left: auto;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+
+    /* ── Main layout ── */
+    .app-main {
+      flex: 1;
+      display: flex; justify-content: center;
+      padding: 1.25rem 1rem 2rem;
+    }
+    .feed-wrap {
+      width: 100%; max-width: 520px;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+
+    /* ── Phase banner ── */
+    .phase-banner {
+      background: var(--accent-bg);
+      border: 1px solid rgba(79,152,163,0.2);
+      border-radius: var(--radius-md);
+      padding: 0.6rem 1rem;
+      font-size: 0.78rem; color: var(--accent);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    /* ── Stories strip ── */
+    .stories-section { }
+    .stories-header {
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--text-faint);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 0 0.25rem 0.6rem;
+    }
+    .stories-strip {
+      display: flex; gap: 0.75rem;
+      overflow-x: auto; padding-bottom: 0.5rem;
+      scrollbar-width: none;
+    }
+    .stories-strip::-webkit-scrollbar { display: none; }
+    .story-item {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 0.35rem;
+      flex-shrink: 0; cursor: pointer;
+    }
+    .story-ring {
+      padding: 2px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #3d6b9e);
+    }
+    .story-item.seen .story-ring {
+      background: var(--surface-3);
+    }
+    .story-ring .avatar {
+      border: 2px solid var(--bg);
+    }
+    .story-user {
+      font-size: 0.68rem; color: var(--text-muted);
+      max-width: 48px; text-align: center;
+      overflow: hidden; text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── Section divider ── */
+    .section-label {
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--text-faint);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 0.25rem 0;
+    }
+
+    /* ── Post card ── */
+    .post-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: box-shadow var(--transition);
+    }
+    .post-card:hover { box-shadow: var(--shadow-md); }
+
+    .post-header {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.75rem 1rem;
+    }
+    .post-username {
+      font-size: 0.88rem; font-weight: 600; color: var(--text);
+    }
+    .post-time {
+      margin-left: auto;
+      font-size: 0.72rem; color: var(--text-faint);
+    }
+
+    .post-image-placeholder {
+      background: var(--surface-2);
+      aspect-ratio: 4/3;
+      display: flex; align-items: center; justify-content: center;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .post-image-inner {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 0.5rem;
+      color: var(--text-faint); font-size: 0.75rem;
+    }
+
+    .post-footer {
+      padding: 0.75rem 1rem 1rem;
+    }
+    .post-likes {
+      font-size: 0.8rem; color: var(--text-muted);
+      display: block; margin-bottom: 0.35rem;
+    }
+    .post-caption {
+      font-size: 0.88rem; color: var(--text);
+      line-height: 1.5; max-width: none;
+    }
+    .post-caption strong {
+      color: var(--text); font-weight: 600;
+      margin-right: 0.3rem;
+    }
+
+    /* ── Empty / end ── */
+    .feed-end {
+      text-align: center; padding: 1.5rem 0;
+      font-size: 0.8rem; color: var(--text-faint);
+    }
+
+    /* ── Bottom footer ── */
+    .app-footer {
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.72rem; color: var(--text-faint);
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="app-header">
+    <a href="./index.html" class="header-logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2">
+        <rect x="2" y="2" width="20" height="20" rx="5"/>
+        <circle cx="12" cy="12" r="4"/>
+        <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+      </svg>
+      IGXSecure
+    </a>
+
+    <div class="header-status">
+      <span class="status-dot online"></span>
+      <span class="hide-mobile">mock data</span>
+    </div>
+
+    <div class="header-actions">
+      <!-- Settings -->
+      <button class="btn-icon" title="Settings" onclick="navigate('./settings.html')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06
+                   a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09
+                   A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83
+                   l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09
+                   A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83
+                   l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09
+                   a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83
+                   l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09
+                   a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+      <!-- Logout -->
+      <button class="btn-icon" title="Logout" onclick="handleLogout()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main feed -->
+  <main class="app-main">
+    <div class="feed-wrap">
+
+      <!-- Phase 1 notice -->
+      <div class="phase-banner">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        Phase 1 — UI preview with mock data. Real Instagram content connects in Phase 5.
+      </div>
+
+      <!-- Stories -->
+      <section class="stories-section">
+        <div class="stories-header">Stories</div>
+        <div class="stories-strip" id="stories-strip"></div>
+      </section>
+
+      <!-- Posts -->
+      <div class="section-label">Feed</div>
+      <div id="post-feed"></div>
+
+      <div class="feed-end">· You're all caught up ·</div>
+
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    IGXSecure &nbsp;·&nbsp; No ads &nbsp;·&nbsp; No reels &nbsp;·&nbsp; No suggestions
+  </footer>
+
+  <div id="toast" class="toast"></div>
+  <script src="./js/app.js"></script>
+  <script>
+    renderStories('stories-strip');
+    renderPosts('post-feed');
+
+    function handleLogout() {
+      showToast('Logout will work after OAuth integration in Phase 4.');
+    }
+  </script>
+</body>
+</html>

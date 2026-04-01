@@ -1,16 +1,14 @@
-# Python
+# Node
+node_modules/
+dist/
+.env
+*.log
+npm-debug.log*
+
+# Python (legacy Clinsta)
 __pycache__/
 *.pyc
 *.pyo
-.env
-*.egg-info/
-
-# Node / React
-node_modules/
-build/
-dist/
-.env.local
-.env.production
 
 # Docker
 *.log
@@ -18,3 +16,8 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Secrets — never commit
+*.pem
+*.key
+*.cert

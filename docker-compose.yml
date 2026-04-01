@@ -1,20 +1,9 @@
 services:
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: clinsta-backend
-    ports:
-      - "8000:8000"
-    restart: unless-stopped
-
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      args:
-        - REACT_APP_API_URL=http://localhost:8000
-    container_name: clinsta-frontend
+    container_name: igxsecure-frontend
     ports:
-      - "3000:3000"
+      - "3000:80"
     restart: unless-stopped
