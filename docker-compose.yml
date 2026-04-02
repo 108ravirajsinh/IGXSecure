@@ -7,3 +7,18 @@ services:
     ports:
       - "3000:80"
     restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: igxsecure-backend
+    ports:
+      - "9000:9000"
+    environment:
+      - PORT=9000
+      - HOST=0.0.0.0
+      - NODE_ENV=development
+      - ALLOWED_ORIGIN=http://localhost:3000
+      - TOKEN_SECRET=change_this_to_a_32_char_secret!!
+    restart: unless-stopped
