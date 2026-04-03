@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: false }));
 /* ── Security ── */
 applySecurity(app);
 
-/* ── Routes ── */
+/* ── Routes ── old code
 const feedRoute = require('./routes/feed');
 app.use('/igxsecure/api', feedRoute);
 
@@ -34,6 +34,22 @@ app.get('/', (req, res) => {
 
 // const systemRouter = require('./routes/system');
 // app.use('/igxsecure/api/system', systemRouter);
+*/
+
+/* ── Routes ── */
+const feedRoute     = require('./routes/feed');
+const systemRouter  = require('./routes/system');
+const authRouter    = require('./routes/auth');
+const postsRouter   = require('./routes/posts');
+const storiesRouter = require('./routes/stories');
+const messagesRouter = require('./routes/messages');
+
+app.use('/igxsecure/api',          feedRoute);
+app.use('/igxsecure/api/system',   systemRouter);
+app.use('/igxsecure/api/auth',     authRouter);
+app.use('/igxsecure/api/posts',    postsRouter);
+app.use('/igxsecure/api/stories',  storiesRouter);
+app.use('/igxsecure/api/messages', messagesRouter);
 
 /* ── 404 ── */
 app.use((req, res) => {
