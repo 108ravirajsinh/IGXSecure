@@ -22,3 +22,6 @@ Thumbs.db
 *.key
 *.cert
 .env
+
+# Master document plan
+documents/
