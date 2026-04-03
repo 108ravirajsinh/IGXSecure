@@ -250,7 +250,7 @@ IGXSecure is built in **full compliance with Meta's Platform Policy**:
 
 <div align="center">
 
-Built with 🛠️ by **Ravirajsinh** — Ontario, Canada
+Built with 🛠️ by **Ravirajsinh Rathod** — Ontario, Canada
 
 *"Own your data. Own your feed. Own your time."*
 

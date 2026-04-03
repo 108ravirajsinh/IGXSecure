@@ -24,6 +24,20 @@ app.use(express.urlencoded({ extended: false }));
 /* ── Security ── */
 applySecurity(app);
 
+const session = require('express-session');
+
+// ── Session ──
+app.use(session({
+  secret:            process.env.TOKEN_SECRET || 'fallback-secret-change-me',
+  resave:            false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,   // JS cannot read cookie
+    secure:   process.env.NODE_ENV === 'production', // HTTPS only in prod
+    maxAge:   60 * 24 * 60 * 60 * 1000 // 60 days
+  }
+}));
+
 /* ── Routes ── old code
 const feedRoute = require('./routes/feed');
 app.use('/igxsecure/api', feedRoute);
