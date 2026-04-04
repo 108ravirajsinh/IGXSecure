@@ -6,10 +6,12 @@ require('dotenv').config();
 
 const express           = require('express');
 const cors              = require('cors');
+const session           = require('express-session');
 const { applySecurity } = require('./config/security');
 const { initDatabase }  = require('./db/init');
 
 const app  = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || '127.0.0.1';
 
@@ -24,38 +26,24 @@ app.use(express.urlencoded({ extended: false }));
 /* ── Security ── */
 applySecurity(app);
 
-const session = require('express-session');
-
-// ── Session ──
+/* ── Session ── */
 app.use(session({
   secret:            process.env.TOKEN_SECRET || 'fallback-secret-change-me',
   resave:            false,
   saveUninitialized: false,
   cookie: {
-    httpOnly: true,   // JS cannot read cookie
-    secure:   process.env.NODE_ENV === 'production', // HTTPS only in prod
-    maxAge:   60 * 24 * 60 * 60 * 1000 // 60 days
+    httpOnly: true,
+    secure:   process.env.NODE_ENV === 'production',
+    maxAge:   60 * 24 * 60 * 60 * 1000
   }
 }));
 
-/* ── Routes ── old code
-const feedRoute = require('./routes/feed');
-app.use('/igxsecure/api', feedRoute);
-
-app.get('/', (req, res) => {
-  res.json({ status: 'IGXSecure API running' });
-});
-
-// const systemRouter = require('./routes/system');
-// app.use('/igxsecure/api/system', systemRouter);
-*/
-
 /* ── Routes ── */
-const feedRoute     = require('./routes/feed');
-const systemRouter  = require('./routes/system');
-const authRouter    = require('./routes/auth');
-const postsRouter   = require('./routes/posts');
-const storiesRouter = require('./routes/stories');
+const feedRoute      = require('./routes/feed');
+const systemRouter   = require('./routes/system');
+const authRouter     = require('./routes/auth');
+const postsRouter    = require('./routes/posts');
+const storiesRouter  = require('./routes/stories');
 const messagesRouter = require('./routes/messages');
 
 app.use('/igxsecure/api',          feedRoute);
@@ -64,6 +52,20 @@ app.use('/igxsecure/api/auth',     authRouter);
 app.use('/igxsecure/api/posts',    postsRouter);
 app.use('/igxsecure/api/stories',  storiesRouter);
 app.use('/igxsecure/api/messages', messagesRouter);
+
+/* ── Health check ── */
+app.get('/', (req, res) => {
+  res.json({ status: 'IGXSecure API running' });
+});
+
+/* ── Temporary dashboard (until Phase 6 frontend) ── */
+app.get('/igxsecure/dashboard', (req, res) => {
+  res.json({
+    message: 'IGXSecure Dashboard — Frontend coming in Phase 6',
+    authenticated: !!req.session?.encryptedToken,
+    userId: req.session?.userId || null
+  });
+});
 
 /* ── 404 ── */
 app.use((req, res) => {
@@ -83,7 +85,7 @@ app.use((err, req, res, next) => {
 /* ── Start ── */
 async function start() {
   try {
-    // await initDatabase();   // ← uncomment after PostgreSQL is installed
+    // await initDatabase();
     app.listen(PORT, HOST, () => {
       console.log(`[IGXSecure] Server running on http://${HOST}:${PORT}`);
       console.log(`[IGXSecure] Environment: ${process.env.NODE_ENV || 'development'}`);

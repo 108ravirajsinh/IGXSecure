@@ -16,10 +16,10 @@ const REDIRECT_URI = process.env.META_REDIRECT_URI
 // ── GET /igxsecure/api/auth/login ──────────────────────────────
 // Redirects user to Meta Instagram OAuth consent screen
 router.get('/login', (req, res) => {
-  const authUrl = new URL('https://api.instagram.com/oauth/authorize');
+  const authUrl = new URL('https://www.instagram.com/oauth/authorize');
   authUrl.searchParams.set('client_id',     APP_ID);
   authUrl.searchParams.set('redirect_uri',  REDIRECT_URI);
-  authUrl.searchParams.set('scope',         'instagram_basic,pages_show_list');
+  authUrl.searchParams.set('scope',         'instagram_business_basic');
   authUrl.searchParams.set('response_type', 'code');
 
   console.log('[AUTH] Redirecting to Meta OAuth');
