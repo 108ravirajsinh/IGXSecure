@@ -78,7 +78,7 @@ router.get('/callback', async (req, res) => {
     console.log(`[AUTH] Login successful — user: ${userId}`);
 
     // Step 4 — Redirect to dashboard
-    res.redirect('/igxsecure/dashboard');
+    res.redirect('/');
 
   } catch (err) {
     const apiError = err.response?.data || err.message;

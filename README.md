@@ -24,7 +24,7 @@
 
 ## 👋 About Me
 
-Hi, I'm **Ravubh** — an IT student and tech enthusiast based in **Callander, Ontario, Canada** 🇨🇦
+Hi, I'm **Ravirajsinh Rathod** — an IT student and tech enthusiast based in **Ontario, Canada** 🇨🇦
 
 I'm passionate about:
 - 🖥️ **Server administration** — HP ProLiant hardware, Ubuntu, Nginx, systemd

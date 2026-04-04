@@ -215,8 +215,9 @@
   <script src="./js/app.js"></script>
   <script>
     function handleConnect() {
-      showToast('OAuth login arrives in Phase 4 — try the dashboard preview below!');
-    }
+  // Phase 4 complete — redirect to real OAuth
+  window.location.href = 'https://biserrate-tonja-narratively.ngrok-free.dev/igxsecure/api/auth/login';
+}
   </script>
 </body>
 </html>

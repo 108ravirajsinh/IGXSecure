@@ -15,6 +15,9 @@ app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || '127.0.0.1';
 
+const path = require('path');
+
+const https = require('https');
 /* ── Middleware ── */
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
@@ -38,7 +41,10 @@ app.use(session({
   }
 }));
 
-/* ── Routes ── */
+/* ── Serve React build ── */
+app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+/* ── API Routes ── */
 const feedRoute      = require('./routes/feed');
 const systemRouter   = require('./routes/system');
 const authRouter     = require('./routes/auth');
@@ -58,13 +64,31 @@ app.get('/', (req, res) => {
   res.json({ status: 'IGXSecure API running' });
 });
 
-/* ── Temporary dashboard (until Phase 6 frontend) ── */
+/* ──Temporary dashboard (until Phase 6 frontend) ── */
 app.get('/igxsecure/dashboard', (req, res) => {
   res.json({
     message: 'IGXSecure Dashboard — Frontend coming in Phase 6',
     authenticated: !!req.session?.encryptedToken,
     userId: req.session?.userId || null
   });
+});
+
+app.get('/igxsecure/api/proxy/image', (req, res) => {
+  const { url } = req.query;
+  if (!url || !url.startsWith('https://')) {
+    return res.status(400).json({ error: 'Invalid URL' });
+  }
+  https.get(url, (stream) => {
+    res.setHeader('Content-Type', stream.headers['content-type'] || 'image/jpeg');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    stream.pipe(res);
+  }).on('error', () => res.status(502).send('Image fetch failed'));
+});
+
+/* ── React catch-all (non-API routes serve index.html) ── */
+app.get('/{*path}', (req, res, next) => {
+  if (req.path.startsWith('/igxsecure/api')) return next();
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
 
 /* ── 404 ── */
