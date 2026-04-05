@@ -1,6 +1,7 @@
 // src/App.js
 import React, { useEffect, useState } from 'react';
 import Navbar   from './components/Navbar';
+import Stories  from './components/Stories'; 
 import PostList from './components/PostList';
 import { apiBaseUrl } from './config/api';
 import './App.css';
@@ -78,16 +79,19 @@ function App() {
 
   /* ── Logged in ── */
   return (
-    <div className="app">
-      <Navbar userId={auth.userId} onLogout={handleLogout} />
-      <main className="app-main">
+  <div className="app">
+    <Navbar userId={auth.userId} onLogout={handleLogout} />
+    <main className="app-main">
+      <div className="feed-wrapper">
+        <Stories />       {/* ← add this above PostList */}
         <PostList />
-      </main>
-      <footer className="app-footer">
-        Distraction-free · No ads · No reels · No suggestions
-      </footer>
-    </div>
-  );
+      </div>
+    </main>
+    <footer className="app-footer">
+      Distraction-free · No ads · No reels · No suggestions
+    </footer>
+  </div>
+);
 }
 
 export default App;

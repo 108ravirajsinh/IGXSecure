@@ -7,20 +7,19 @@ require('dotenv').config();
 const express           = require('express');
 const cors              = require('cors');
 const session           = require('express-session');
+const path              = require('path');
+const https             = require('https');
 const { applySecurity } = require('./config/security');
-const { initDatabase }  = require('./db/init');
+// const { initDatabase } = require('./db/init');
 
 const app  = express();
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || '127.0.0.1';
 
-const path = require('path');
-
-const https = require('https');
 /* ── Middleware ── */
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin:      process.env.CLIENT_URL || 'http://localhost:3000',
   credentials: true
 }));
 app.use(express.json());
@@ -59,41 +58,36 @@ app.use('/igxsecure/api/posts',    postsRouter);
 app.use('/igxsecure/api/stories',  storiesRouter);
 app.use('/igxsecure/api/messages', messagesRouter);
 
-/* ── Health check ── */
-app.get('/', (req, res) => {
-  res.json({ status: 'IGXSecure API running' });
-});
-
-/* ──Temporary dashboard (until Phase 6 frontend) ── */
-app.get('/igxsecure/dashboard', (req, res) => {
-  res.json({
-    message: 'IGXSecure Dashboard — Frontend coming in Phase 6',
-    authenticated: !!req.session?.encryptedToken,
-    userId: req.session?.userId || null
-  });
-});
-
+/* ── Media Proxy (images + video streaming) ── */
 app.get('/igxsecure/api/proxy/image', (req, res) => {
   const { url } = req.query;
   if (!url || !url.startsWith('https://')) {
-    return res.status(400).json({ error: 'Invalid URL' });
+    return res.status(400).json({ error: 'Invalid media URL' });
   }
-  https.get(url, (stream) => {
-    res.setHeader('Content-Type', stream.headers['content-type'] || 'image/jpeg');
-    res.setHeader('Cache-Control', 'public, max-age=86400');
+
+  const options = { headers: {} };
+  if (req.headers.range) {
+    options.headers['Range'] = req.headers.range;
+  }
+
+  https.get(url, options, (stream) => {
+    const status = stream.statusCode || 200;
+    res.setHeader('Content-Type',   stream.headers['content-type']   || 'application/octet-stream');
+    res.setHeader('Accept-Ranges',  'bytes');
+    res.setHeader('Cache-Control',  'public, max-age=86400');
+    if (stream.headers['content-length'])
+      res.setHeader('Content-Length', stream.headers['content-length']);
+    if (stream.headers['content-range'])
+      res.setHeader('Content-Range',  stream.headers['content-range']);
+    res.status(status);
     stream.pipe(res);
-  }).on('error', () => res.status(502).send('Image fetch failed'));
+  }).on('error', () => res.status(502).send('Media fetch failed'));
 });
 
-/* ── React catch-all (non-API routes serve index.html) ── */
+/* ── React catch-all ── */
 app.get('/{*path}', (req, res, next) => {
   if (req.path.startsWith('/igxsecure/api')) return next();
   res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
-});
-
-/* ── 404 ── */
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
 });
 
 /* ── Global error handler ── */

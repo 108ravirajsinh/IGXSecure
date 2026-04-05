@@ -4,6 +4,7 @@
  */
 
 const crypto = require('crypto');
+const axios  = require('axios');
 
 const ALGORITHM  = 'aes-256-gcm';
 const SECRET_KEY = Buffer.from(
@@ -22,7 +23,6 @@ function encryptToken(plainText) {
     cipher.final()
   ]);
   const authTag = cipher.getAuthTag();
-
   return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted.toString('hex')}`;
 }
 
@@ -45,4 +45,22 @@ function decryptToken(encryptedText) {
   ]).toString('utf8');
 }
 
-module.exports = { encryptToken, decryptToken };
+/**
+ * Refresh a long-lived Instagram token
+ * Instagram allows refresh anytime while token is still valid
+ * Returns: { access_token, expires_in } or throws on failure
+ */
+async function refreshInstagramToken(plainToken) {
+  const response = await axios.get('https://graph.instagram.com/refresh_access_token', {
+    params: {
+      grant_type:   'ig_refresh_token',
+      access_token: plainToken,
+    },
+  });
+  return {
+    access_token: response.data.access_token,
+    expires_in:   response.data.expires_in, // seconds
+  };
+}
+
+module.exports = { encryptToken, decryptToken, refreshInstagramToken };

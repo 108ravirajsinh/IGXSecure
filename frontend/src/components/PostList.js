@@ -12,7 +12,7 @@ function PostList() {
     fetch(`${apiBaseUrl}/feed`, { credentials: 'include' })
       .then(r => r.json())
       .then(data => {
-        if (data.success) setPosts(data.data);
+        if (data.success) setPosts(data.data.filter(post => post && post.media_type));
         else setError(data.error || 'Failed to load feed');
       })
       .catch(err => setError(err.message || 'Network error'))
