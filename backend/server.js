@@ -53,6 +53,7 @@ const authRouter     = require('./routes/auth');
 const postsRouter    = require('./routes/posts');
 const storiesRouter  = require('./routes/stories');
 const messagesRouter = require('./routes/messages');
+const notificationsRouter = require('./routes/notifications');
 
 app.use('/igxsecure/api',          feedRoute);
 app.use('/igxsecure/api/system',   systemRouter);
@@ -60,6 +61,7 @@ app.use('/igxsecure/api/auth',     authRouter);
 app.use('/igxsecure/api/posts',    postsRouter);
 app.use('/igxsecure/api/stories',  storiesRouter);
 app.use('/igxsecure/api/messages', messagesRouter);
+app.use('/igxsecure/api/notifications', notificationsRouter);
 
 /* ── Media Proxy (images + video streaming) ── */
 app.get('/igxsecure/api/proxy/image', (req, res) => {

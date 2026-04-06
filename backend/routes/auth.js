@@ -19,7 +19,7 @@ router.get('/login', (req, res) => {
   const authUrl = new URL('https://www.instagram.com/oauth/authorize');
   authUrl.searchParams.set('client_id',     APP_ID);
   authUrl.searchParams.set('redirect_uri',  REDIRECT_URI);
-  authUrl.searchParams.set('scope',         'instagram_business_basic');
+  authUrl.searchParams.set('scope',         'instagram_business_basic,instagram_business_manage_insights,instagram_business_manage_messages');
   authUrl.searchParams.set('response_type', 'code');
 
   console.log('[AUTH] Redirecting to Meta OAuth');

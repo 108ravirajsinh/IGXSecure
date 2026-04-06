@@ -58,18 +58,18 @@ Your Instagram Data — securely
 
 ## ✨ Core Features
 
-| Feature | Status |
-|---|---|
-| 📰 Clean Instagram feed (no ads, no algorithm) | 🟡 In Progress |
-| 💬 Direct Messages viewer | 🔜 Planned |
-| 📖 Stories viewer | 🔜 Planned |
-| 🔐 OAuth2 login via Meta | 🔜 Phase 5B |
-| 🛡️ Helmet.js security headers | ✅ Live |
-| ⚡ Rate limiting (100 req/15min) | ✅ Live |
-| 🌐 CORS locked to frontend origin | ✅ Live |
-| 🗄️ PostgreSQL user data layer | 🟡 Pending install |
-| 📱 PWA / Mobile-ready UI | 🔜 Phase 7 |
-| 🔑 AES-256 token encryption | 🔜 Phase 5B |
+| Feature                                        | Status                    |
+| ---------------------------------------------- | ------------------------- |
+| 📰 Clean Instagram feed (no ads, no algorithm) | ✅ Live                    |
+| 💬 Direct Messages viewer                      | ⏳ Pending Meta App Review |
+| 📖 Stories viewer + Insights                   | ✅ Live                    |
+| 🔔 Notifications (likes + comments)            | ✅ Live                    |
+| 🔐 OAuth2 login via Meta                       | ✅ Live                    |
+| 🛡️ Helmet.js security headers                 | ✅ Live                    |
+| ⚡ Rate limiting (100 req/15min)                | ✅ Live                    |
+| 🌐 CORS locked to frontend origin              | ✅ Live                    |
+| 🔑 AES-256 token encryption                    | ✅ Live                    |
+| 📱 PWA / Mobile-ready UI                       | 🔜 Phase 7                |
 
 ***
 
@@ -175,14 +175,13 @@ IGXSecure is built security-first — not as an afterthought.
 ## 🗺️ Development Roadmap
 
 ```
-Phase 1  ✅  Static UI — HTML/CSS/JS + Nginx routing
-Phase 2  ✅  Backend Setup — Express + security middleware + systemd
+Phase 1  ✅  Static UI — React + Navbar + routing
+Phase 2  ✅  Backend Setup — Express + security middleware
 Phase 3  ✅  API Integration — Modular routes + health monitoring
-Phase 4  ✅  Database Layer — PostgreSQL schema + connection pool
-Phase 5A ✅  Instagram Feed API — Live posts via Meta Graph API
-Phase 5B 🟡  OAuth Flow — Meta login + token exchange + secure storage
-Phase 6  🔜  Frontend UI — React feed, messages, stories panels
-Phase 7  🔜  Production Launch — Privacy policy + Meta app review
+Phase 4  ✅  OAuth Flow — Meta login + token exchange + AES-256 encryption
+Phase 5  ✅  Instagram Features — Feed, Stories + Insights, Notifications
+Phase 6  🟡  Messages — Pending Meta App Review + Business Verification
+Phase 7  🔜  Production Launch — Privacy policy + Meta app review + PWA
 ```
 
 ***

@@ -1,16 +1,18 @@
 // src/App.js
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar    from './components/Navbar';
 import Stories   from './components/Stories';
 import PostList  from './components/PostList';
 import Settings  from './components/Settings';
+import Messages from './components/Messages';
+import Notifications from './components/Notifications';
 import { apiBaseUrl } from './config/api';
 import './App.css';
 
 function App() {
   const [auth, setAuth]     = useState({ loading: true, authenticated: false, userId: null });
   const [view, setView]     = useState('feed'); // 'feed' | 'settings'
-
+    
   useEffect(() => {
     fetch(`${apiBaseUrl}/auth/status`, { credentials: 'include' })
       .then(r => r.json())
@@ -18,10 +20,12 @@ function App() {
       .catch(() => setAuth({ loading: false, authenticated: false, userId: null }));
   }, []);
 
+  const isLoggingOutRef = useRef(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
 const handleLogout = async () => {
-  if (isLoggingOut) return;          // ← blocks double calls
+  if (isLoggingOutRef.current) return;   // ← ref guard, never bypassed
+  isLoggingOutRef.current = true;
   setIsLoggingOut(true);
   try {
     await fetch('/igxsecure/api/auth/logout', {
@@ -29,8 +33,9 @@ const handleLogout = async () => {
       credentials: 'include'
     });
   } finally {
+    isLoggingOutRef.current = false; // no freezing ui
     setIsLoggingOut(false);
-    setAuthenticated(false);         // instant UI update, no freeze
+    setAuth({ authenticated: false, userId: null });
   }
 };
   /* ── Loading ── */
@@ -96,6 +101,7 @@ const handleLogout = async () => {
       <Navbar
         userId={auth.userId}
         onLogout={handleLogout}
+        isLoggingOut={isLoggingOut}
         view={view}
         onViewChange={setView}
       />
@@ -106,9 +112,18 @@ const handleLogout = async () => {
             <PostList />
           </div>
         )}
+
+        {view === 'notifications' && <Notifications />}
+        
         {view === 'settings' && (
           <Settings userId={auth.userId} onLogout={handleLogout} />
         )}
+
+        {/* ── ADD THIS ── */}
+        {view === 'messages' && (
+          <Messages userId={auth.userId} />
+        )}
+
       </main>
       <footer className="app-footer">
         Distraction-free · No ads · No reels · No suggestions
