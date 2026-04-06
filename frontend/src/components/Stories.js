@@ -1,133 +1,105 @@
 // src/components/Stories.js
 import React, { useEffect, useState } from 'react';
-import { apiBaseUrl } from '../config/api';
 
-function proxyUrl(url) {
-  if (!url) return null;
-  return `${apiBaseUrl}/proxy/image?url=${encodeURIComponent(url)}`;
-}
+const API = process.env.REACT_APP_API_BASE || '';
 
 function Stories() {
-  const [stories,  setStories]  = useState([]);
-  const [loading,  setLoading]  = useState(true);
-  const [active,   setActive]   = useState(null); // lightbox index
+  const [stories, setStories]   = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [selected, setSelected] = useState(null);
+  const [error, setError]       = useState(null);
 
   useEffect(() => {
-    fetch(`${apiBaseUrl}/stories`, { credentials: 'include' })
+    fetch(`${API}/igxsecure/api/stories/insights`, { credentials: 'include' })
       .then(r => r.json())
       .then(data => {
-        if (data.success) setStories(data.data.filter(s => s && s.media_type));
+        setStories(data.stories || []);
+        setLoading(false);
       })
-      .catch(err => console.warn('[STORIES]', err.message))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        setError('Could not load stories');
+        setLoading(false);
+      });
   }, []);
 
-  // Don't render anything if no stories
-  if (loading || !stories.length) return null;
-
-  const current = active !== null ? stories[active] : null;
-  const isVideo = current?.media_type === 'VIDEO';
-  const mediaSrc = current
-    ? proxyUrl(isVideo ? current.thumbnail_url : current.media_url)
-    : null;
+  if (loading) return <div className="stories-loading">Loading stories…</div>;
+  if (error)   return <div className="stories-error">{error}</div>;
+  if (!stories.length) return <div className="stories-empty">No active stories</div>;
 
   return (
     <>
-      {/* ── Stories Strip ── */}
-      <div className="stories-strip" role="region" aria-label="Stories">
-        {stories.map((story, i) => {
-          const thumb = proxyUrl(
-            story.media_type === 'VIDEO' ? story.thumbnail_url : story.media_url
-          );
-          return (
-            <button
-              key={story.id}
-              className="story-bubble"
-              onClick={() => setActive(i)}
-              aria-label={`View story ${i + 1}`}
-            >
-              <div className="story-ring">
-                <div className="story-thumb">
-                  {thumb
-                    ? <img src={thumb} alt="" loading="lazy" onError={e => e.target.style.display='none'} />
-                    : <span className="story-thumb-fallback">📷</span>
-                  }
-                  {story.media_type === 'VIDEO' && (
-                    <span className="story-video-badge">▶</span>
-                  )}
-                </div>
-              </div>
-              <span className="story-label">Story {i + 1}</span>
-            </button>
-          );
-        })}
+      {/* ── Story bubbles row ── */}
+      <div className="stories-row">
+        {stories.map(story => (
+          <button
+            key={story.id}
+            className="story-bubble-wrap"
+            onClick={() => setSelected(story)}
+          >
+            <div className="story-bubble">
+              <img
+                src={story.thumbnail_url || story.media_url}
+                alt="story"
+                className="story-thumb"
+              />
+            </div>
+
+            {/* 👁 view count badge */}
+            <div className="story-views">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" strokeWidth="2.5">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <span>{story.insights?.reach ?? 0}</span>
+            </div>
+          </button>
+        ))}
       </div>
 
-      {/* ── Story Lightbox ── */}
-      {active !== null && current && (
-        <div
-          className="story-backdrop"
-          onClick={() => setActive(null)}
-          role="dialog"
-          aria-modal="true"
-        >
-          {/* Close */}
-          <button
-            className="lightbox-close"
-            onClick={() => setActive(null)}
-            aria-label="Close story"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" strokeWidth="2.5">
-              <path d="M18 6 6 18M6 6l12 12"/>
-            </svg>
-          </button>
+      {/* ── Story viewer modal ── */}
+      {selected && (
+        <div className="story-modal-overlay" onClick={() => setSelected(null)}>
+          <div className="story-modal" onClick={e => e.stopPropagation()}>
+            <button className="story-modal-close" onClick={() => setSelected(null)}>✕</button>
 
-          {/* Prev */}
-          {active > 0 && (
-            <button
-              className="story-nav story-nav-prev"
-              onClick={e => { e.stopPropagation(); setActive(active - 1); }}
-              aria-label="Previous story"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" strokeWidth="2.5">
-                <path d="M15 18l-6-6 6-6"/>
-              </svg>
-            </button>
-          )}
+            {selected.media_type === 'VIDEO' ? (
+              <video src={selected.media_url} className="story-modal-media" controls autoPlay />
+            ) : (
+              <img src={selected.media_url} alt="story" className="story-modal-media" />
+            )}
 
-          {/* Media */}
-          <div className="story-media" onClick={e => e.stopPropagation()}>
-            {isVideo
-              ? <video
-                  className="story-full-media"
-                  src={proxyUrl(current.media_url)}
-                  poster={proxyUrl(current.thumbnail_url) || undefined}
-                  controls autoPlay playsInline
-                />
-              : <img
-                  className="story-full-media"
-                  src={mediaSrc}
-                  alt={`Story ${active + 1}`}
-                />
-            }
-            <div className="story-counter">{active + 1} / {stories.length}</div>
+            {/* Insights panel */}
+            <div className="story-insights-bar">
+              <div className="story-insight-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" strokeWidth="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>{selected.insights?.reach ?? 0} <em>Reach</em></span>
+              </div>
+              <div className="story-insight-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" strokeWidth="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>{selected.insights?.impressions ?? 0} <em>Impressions</em></span>
+              </div>
+              <div className="story-insight-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>{selected.insights?.replies ?? 0} <em>Replies</em></span>
+              </div>
+            </div>
+
+            <div className="story-modal-time">
+              {new Date(selected.timestamp).toLocaleString()}
+            </div>
           </div>
-
-          {/* Next */}
-          {active < stories.length - 1 && (
-            <button
-              className="story-nav story-nav-next"
-              onClick={e => { e.stopPropagation(); setActive(active + 1); }}
-              aria-label="Next story"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" strokeWidth="2.5">
-                <path d="M9 18l6-6-6-6"/>
-              </svg>
-            </button>
-          )}
         </div>
       )}
     </>

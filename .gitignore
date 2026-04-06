@@ -25,3 +25,6 @@ Thumbs.db
 
 # Master document plan
 documents/
+
+#database
+db/sessions.db

@@ -29,7 +29,10 @@ app.use(express.urlencoded({ extended: false }));
 applySecurity(app);
 
 /* ── Session ── */
+const SQLiteStore = require('connect-sqlite3')(session);
+
 app.use(session({
+  store: new SQLiteStore({ db: 'sessions.db', dir: './db' }),
   secret:            process.env.TOKEN_SECRET || 'fallback-secret-change-me',
   resave:            false,
   saveUninitialized: false,

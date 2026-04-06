@@ -6,11 +6,11 @@
 
 const { decryptToken, encryptToken, refreshInstagramToken } = require('../utils/token');
 
-const SEVEN_DAYS_MS = 999 * 24 * 60 * 60 * 1000;
+const SEVEN_DAYS_MS   = 7 * 24 * 60 * 60 * 1000;
+const refreshingUsers = new Set();
 
 async function requireAuth(req, res, next) {
   try {
-    // ── Check session exists ──
     if (!req.session?.encryptedToken) {
       return res.status(401).json({
         error:    'Unauthorized',
@@ -19,7 +19,6 @@ async function requireAuth(req, res, next) {
       });
     }
 
-    // ── Check token not expired ──
     const expiresAt = req.session.tokenExpiresAt;
     if (expiresAt && Date.now() > expiresAt) {
       req.session.destroy();
@@ -30,27 +29,25 @@ async function requireAuth(req, res, next) {
       });
     }
 
-    // ── Decrypt token ──
-    const plainToken = decryptToken(req.session.encryptedToken);
-
-    // ── Auto-refresh if less than 7 days remain ──
+    const plainToken    = decryptToken(req.session.encryptedToken);
     const timeRemaining = expiresAt ? expiresAt - Date.now() : Infinity;
-    if (timeRemaining < SEVEN_DAYS_MS) {
+    const userId        = req.session.userId;
+
+    // ── Auto-refresh with lock (prevents race condition) ──
+    if (timeRemaining < SEVEN_DAYS_MS && !refreshingUsers.has(userId)) {
+      refreshingUsers.add(userId);
       try {
         console.log(`[AUTH] Token expiring soon (${Math.floor(timeRemaining / 86400000)}d left) — refreshing…`);
-
         const { access_token, expires_in } = await refreshInstagramToken(plainToken);
-
-        // Update session with new encrypted token + expiry
-        req.session.encryptedToken  = encryptToken(access_token);
-        req.session.tokenExpiresAt  = Date.now() + (expires_in * 1000);
-        req.accessToken             = access_token;
-
+        req.session.encryptedToken = encryptToken(access_token);
+        req.session.tokenExpiresAt = Date.now() + (expires_in * 1000);
+        req.accessToken            = access_token;
         console.log(`[AUTH] Token refreshed — new expiry: ${new Date(req.session.tokenExpiresAt).toISOString()}`);
       } catch (refreshErr) {
-        // Refresh failed — still continue with old token, log the warning
-        console.warn('[AUTH] Token refresh failed (will retry next request):', refreshErr.message);
+        console.warn('[AUTH] Token refresh failed:', refreshErr.message);
         req.accessToken = plainToken;
+      } finally {
+        refreshingUsers.delete(userId);
       }
     } else {
       req.accessToken = plainToken;
