@@ -18,6 +18,11 @@ router.get('/', async (req, res) => {
       `&access_token=${accessToken}`
     );
     const data = await response.json();
+     
+    if (data.error) {
+      console.warn('⚠️ Stories not available:', data.error.message);
+      return res.json({ data: [] });   // return empty, not 500
+    }
     res.json(data);
   } catch (err) {
     console.error('Stories fetch error:', err);
@@ -43,6 +48,14 @@ router.get('/insights', async (req, res) => {
     );
     const storiesData = await storiesRes.json();
 
+        if (storiesData.error) {
+          console.warn('⚠️ Stories insights not available:', storiesData.error.message);
+          return res.json({ stories: [] });  // return empty, not 500
+        }
+
+        if (!storiesData.data || storiesData.data.length === 0) {
+          return res.json({ stories: [] });
+        }
     console.log('📸 RAW STORIES RESPONSE:', JSON.stringify(storiesData, null, 2));
 
     if (!storiesData.data || storiesData.data.length === 0) {
