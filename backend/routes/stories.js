@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router  = express.Router();
 const { decryptToken } = require('../utils/token');
@@ -7,10 +6,10 @@ const { decryptToken } = require('../utils/token');
 router.get('/', async (req, res) => {
   console.log('🔑 SESSION:', req.session);
   const accessToken = req.session?.encryptedToken
-  ? decryptToken(req.session.encryptedToken)
-  : null;
-   if (!accessToken) return res.status(401).json({ error: 'Not authenticated' });
-  const userId      = req.session?.userId;
+    ? decryptToken(req.session.encryptedToken)
+    : null;
+  if (!accessToken) return res.status(401).json({ error: 'Not authenticated' });
+  const userId = req.session?.userId;
 
   try {
     const response = await fetch(
@@ -28,13 +27,17 @@ router.get('/', async (req, res) => {
 
 // GET /igxsecure/api/stories/insights
 router.get('/insights', async (req, res) => {
-  const accessToken = req.session?.accessToken;
+  const accessToken = req.session?.encryptedToken
+    ? decryptToken(req.session.encryptedToken)
+    : null;
   if (!accessToken) return res.status(401).json({ error: 'Not authenticated' });
+
+  const userId = req.session?.userId;
 
   try {
     // 1. Fetch all stories
     const storiesRes = await fetch(
-      `https://graph.instagram.com/v21.0/${req.session.userId}/stories` +
+      `https://graph.instagram.com/v21.0/${userId}/stories` +
       `?fields=id,media_type,media_url,thumbnail_url,timestamp` +
       `&access_token=${accessToken}`
     );

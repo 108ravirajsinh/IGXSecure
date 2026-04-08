@@ -17,20 +17,37 @@ const corsOptions = {
   credentials: true,
 };
 
-/* ── Rate limiting: 100 requests per 15 minutes per IP ── */
-const limiter = rateLimit({
+/* ── Rate limiting ── */
+
+// 1. Auth callback — strict (5 per 15 min, prevent OAuth abuse)
+const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 5,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests. Please try again later.' },
 });
 
-/* ── Apply all security middleware to the Express app ── */
+// 2. API routes — relaxed for normal usage (300 per 15 min)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Please try again later.' },
+});
+
 function applySecurity(app) {
   app.use(helmet());
   app.use(cors(corsOptions));
-  app.use(limiter);
+
+  // Auth callback gets strict limiter
+  app.use('/igxsecure/api/auth/callback', authLimiter);
+
+  // All other API routes get relaxed limiter
+  app.use('/igxsecure/api', apiLimiter);
+
+  // NO global limiter — static files (/, /favicon.ico) are unlimited
 }
 
 module.exports = { applySecurity };

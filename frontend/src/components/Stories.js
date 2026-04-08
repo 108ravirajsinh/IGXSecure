@@ -13,11 +13,31 @@ function Stories() {
   const STORY_DURATION          = 5000; // ms per story
 
   useEffect(() => {
-    fetch(`${API}/igxsecure/api/stories/insights`, { credentials: 'include' })
-      .then(r => r.json())
-      .then(data => { setStories(data.stories || []); setLoading(false); })
-      .catch(() => { setError('Could not load stories'); setLoading(false); });
-  }, []);
+  fetch(`${API}/igxsecure/api/stories/insights`, { credentials: 'include' })
+    .then(async r => {
+      if (r.status === 401) {
+        const basic = await fetch(`${API}/igxsecure/api/stories`, { credentials: 'include' });
+        const data = await basic.json();
+        const stories = (data.data || []).map(s => ({
+          ...s,
+          insights: { reach: 0, impressions: 0, replies: 0 }
+        }));
+        setStories(stories);
+        setLoading(false);
+        return null;
+      }
+      return r.json();
+    })
+    .then(data => {
+      if (!data) return;
+      setStories(data.stories || []);
+      setLoading(false);
+    })
+    .catch(() => {
+      setError('Could not load stories');
+      setLoading(false);
+    });
+}, []);
 
   // ── Progress bar timer ──
   useEffect(() => {
