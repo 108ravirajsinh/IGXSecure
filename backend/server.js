@@ -5,11 +5,11 @@
 require('dotenv').config();
 
 const express           = require('express');
-const cors              = require('cors');
 const session           = require('express-session');
 const path              = require('path');
 const https             = require('https');
 const { applySecurity } = require('./config/security');
+const { requireAuth }   = require('./middleware/auth.middleware');
 // const { initDatabase } = require('./db/init');
 
 const app  = express();
@@ -18,22 +18,24 @@ const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || '127.0.0.1';
 
 /* ── Middleware ── */
-app.use(cors({
-  origin:      process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true
-}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 /* ── Security ── */
 applySecurity(app);
 
-/* ── Session ── */
+//* ── Session ── */
 const SQLiteStore = require('connect-sqlite3')(session);
+
+// SESSION_SECRET must be set separately from TOKEN_SECRET
+const SESSION_SECRET = process.env.SESSION_SECRET;
+if (!SESSION_SECRET) {
+  throw new Error('SESSION_SECRET must be set');
+}
 
 app.use(session({
   store: new SQLiteStore({ db: 'sessions.db', dir: './db' }),
-  secret:            process.env.TOKEN_SECRET || 'fallback-secret-change-me',
+  secret:            SESSION_SECRET,
   resave:            false,
   saveUninitialized: false,
   cookie: {
@@ -55,19 +57,39 @@ const storiesRouter  = require('./routes/stories');
 const messagesRouter = require('./routes/messages');
 const notificationsRouter = require('./routes/notifications');
 
-app.use('/igxsecure/api',          feedRoute);
-app.use('/igxsecure/api/system',   systemRouter);
-app.use('/igxsecure/api/auth',     authRouter);
-app.use('/igxsecure/api/posts',    postsRouter);
-app.use('/igxsecure/api/stories',  storiesRouter);
-app.use('/igxsecure/api/messages', messagesRouter);
-app.use('/igxsecure/api/notifications', notificationsRouter);
+// Public or low-risk routes
+app.use('/igxsecure/api/system', systemRouter);
+app.use('/igxsecure/api/auth',   authRouter);
+
+// Protected routes — require authenticated session
+app.use('/igxsecure/api',                requireAuth, feedRoute);
+app.use('/igxsecure/api/posts',          requireAuth, postsRouter);
+app.use('/igxsecure/api/stories',        requireAuth, storiesRouter);
+app.use('/igxsecure/api/messages',       requireAuth, messagesRouter);
+app.use('/igxsecure/api/notifications',  requireAuth, notificationsRouter);
 
 /* ── Media Proxy (images + video streaming) ── */
-app.get('/igxsecure/api/proxy/image', (req, res) => {
+const allowedMediaHosts = [
+  'scontent.cdninstagram.com',
+  'scontent.xx.fbcdn.net',
+  'instagram.fdel1-1.fna.fbcdn.net', // adjust to your region as needed
+];
+
+app.get('/igxsecure/api/proxy/image', requireAuth, (req, res) => {
   const { url } = req.query;
   if (!url || !url.startsWith('https://')) {
     return res.status(400).json({ error: 'Invalid media URL' });
+  }
+
+  let target;
+  try {
+    target = new URL(url);
+  } catch {
+    return res.status(400).json({ error: 'Invalid media URL' });
+  }
+
+  if (!allowedMediaHosts.includes(target.hostname)) {
+    return res.status(400).json({ error: 'Host not allowed' });
   }
 
   const options = { headers: {} };
@@ -75,7 +97,7 @@ app.get('/igxsecure/api/proxy/image', (req, res) => {
     options.headers['Range'] = req.headers.range;
   }
 
-  https.get(url, options, (stream) => {
+  https.get(target.toString(), options, (stream) => {
     const status = stream.statusCode || 200;
     res.setHeader('Content-Type',   stream.headers['content-type']   || 'application/octet-stream');
     res.setHeader('Accept-Ranges',  'bytes');

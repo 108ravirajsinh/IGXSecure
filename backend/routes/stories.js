@@ -1,15 +1,16 @@
 const express = require('express');
 const router  = express.Router();
-const { decryptToken } = require('../utils/token');
+
+const isDev   = process.env.NODE_ENV !== 'production';
 
 // GET /igxsecure/api/stories
 router.get('/', async (req, res) => {
-  console.log('🔑 SESSION:', req.session);
-  const accessToken = req.session?.encryptedToken
-    ? decryptToken(req.session.encryptedToken)
-    : null;
-  if (!accessToken) return res.status(401).json({ error: 'Not authenticated' });
-  const userId = req.session?.userId;
+  const accessToken = req.accessToken;
+  const userId      = req.session?.userId;
+
+  if (!accessToken || !userId) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
 
   try {
     const response = await fetch(
@@ -18,26 +19,30 @@ router.get('/', async (req, res) => {
       `&access_token=${accessToken}`
     );
     const data = await response.json();
-     
+
     if (data.error) {
-      console.warn('⚠️ Stories not available:', data.error.message);
-      return res.json({ data: [] });   // return empty, not 500
+      if (isDev) {
+        console.warn('⚠️ Stories not available:', data.error);
+      }
+      // Return empty list instead of surfacing Meta error to client
+      return res.json({ data: [] });
     }
+
     res.json(data);
   } catch (err) {
-    console.error('Stories fetch error:', err);
+    console.error('Stories fetch error:', isDev ? err : err.message);
     res.status(500).json({ error: 'Failed to fetch stories' });
   }
 });
 
 // GET /igxsecure/api/stories/insights
 router.get('/insights', async (req, res) => {
-  const accessToken = req.session?.encryptedToken
-    ? decryptToken(req.session.encryptedToken)
-    : null;
-  if (!accessToken) return res.status(401).json({ error: 'Not authenticated' });
+  const accessToken = req.accessToken;
+  const userId      = req.session?.userId;
 
-  const userId = req.session?.userId;
+  if (!accessToken || !userId) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
 
   try {
     // 1. Fetch all stories
@@ -48,15 +53,12 @@ router.get('/insights', async (req, res) => {
     );
     const storiesData = await storiesRes.json();
 
-        if (storiesData.error) {
-          console.warn('⚠️ Stories insights not available:', storiesData.error.message);
-          return res.json({ stories: [] });  // return empty, not 500
-        }
-
-        if (!storiesData.data || storiesData.data.length === 0) {
-          return res.json({ stories: [] });
-        }
-    console.log('📸 RAW STORIES RESPONSE:', JSON.stringify(storiesData, null, 2));
+    if (storiesData.error) {
+      if (isDev) {
+        console.warn('⚠️ Stories insights not available:', storiesData.error);
+      }
+      return res.json({ stories: [] });
+    }
 
     if (!storiesData.data || storiesData.data.length === 0) {
       return res.json({ stories: [] });
@@ -87,7 +89,10 @@ router.get('/insights', async (req, res) => {
             replies:     metrics.replies     ?? 0,
           }
         };
-      } catch {
+      } catch (err) {
+        if (isDev) {
+          console.warn('Story insight fetch failed:', err);
+        }
         return { ...story, insights: { impressions: 0, reach: 0, replies: 0 } };
       }
     });
@@ -96,7 +101,7 @@ router.get('/insights', async (req, res) => {
     res.json({ stories });
 
   } catch (err) {
-    console.error('Story insights error:', err);
+    console.error('Story insights error:', isDev ? err : err.message);
     res.status(500).json({ error: 'Failed to fetch story insights' });
   }
 });

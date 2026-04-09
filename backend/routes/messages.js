@@ -1,18 +1,16 @@
-const express          = require('express');
-const router           = express.Router();
-const { decryptToken } = require('../utils/token');
+const express = require('express');
+const router  = express.Router();
 
-const IG_API = 'https://graph.facebook.com/v21.0';
-
-const getToken = (req) =>
-  req.session?.encryptedToken ? decryptToken(req.session.encryptedToken) : null;
+const IG_API  = 'https://graph.facebook.com/v21.0';
+const isDev   = process.env.NODE_ENV !== 'production';
 
 // ── GET /igxsecure/api/messages ─────────────────────────────
 router.get('/', async (req, res) => {
-  const accessToken = getToken(req);
+  const accessToken = req.accessToken;             // from requireAuth
   const userId      = req.session?.userId;
-  if (!accessToken || !userId)
+  if (!accessToken || !userId) {
     return res.status(401).json({ error: 'Not authenticated' });
+  }
 
   try {
     // Step 1 — Get Facebook Page connected to Instagram account
@@ -20,6 +18,13 @@ router.get('/', async (req, res) => {
       `${IG_API}/me/accounts?access_token=${accessToken}`
     );
     const pagesData = await pagesRes.json();
+
+    if (pagesData.error) {
+      if (isDev) {
+        console.warn('[MESSAGES] /me/accounts error:', pagesData.error);
+      }
+      return res.status(400).json({ error: pagesData.error.message || 'Failed to fetch pages' });
+    }
 
     if (!pagesData.data || pagesData.data.length === 0) {
       return res.status(400).json({
@@ -41,8 +46,12 @@ router.get('/', async (req, res) => {
     );
     const convData = await convRes.json();
 
-    if (convData.error)
+    if (convData.error) {
+      if (isDev) {
+        console.warn('[MESSAGES] /conversations error:', convData.error);
+      }
       return res.status(400).json({ error: convData.error.message });
+    }
 
     // Save pageId + pageToken in session for thread/reply use
     req.session.pageId          = pageId;
@@ -51,20 +60,21 @@ router.get('/', async (req, res) => {
     res.json({ conversations: convData.data || [] });
 
   } catch (err) {
-    console.error('[MESSAGES] Inbox error:', err);
+    console.error('[MESSAGES] Inbox error:', isDev ? err : err.message);
     res.status(500).json({ error: 'Failed to fetch inbox' });
   }
 });
 
 // ── GET /igxsecure/api/messages/:threadId ───────────────────
 router.get('/:threadId', async (req, res) => {
-  const accessToken     = getToken(req);
+  const accessToken     = req.accessToken;
   const pageAccessToken = req.session?.pageAccessToken;
   const pageId          = req.session?.pageId;
   const { threadId }    = req.params;
 
-  if (!accessToken)
+  if (!accessToken) {
     return res.status(401).json({ error: 'Not authenticated' });
+  }
 
   const token = pageAccessToken || accessToken;
 
@@ -76,7 +86,12 @@ router.get('/:threadId', async (req, res) => {
     );
     const data = await response.json();
 
-    if (data.error) return res.status(400).json({ error: data.error.message });
+    if (data.error) {
+      if (isDev) {
+        console.warn('[MESSAGES] Thread error:', data.error);
+      }
+      return res.status(400).json({ error: data.error.message });
+    }
 
     res.json({
       threadId,
@@ -84,7 +99,7 @@ router.get('/:threadId', async (req, res) => {
       messages:     data.messages?.data    || [],
     });
   } catch (err) {
-    console.error('[MESSAGES] Thread error:', err);
+    console.error('[MESSAGES] Thread error:', isDev ? err : err.message);
     res.status(500).json({ error: 'Failed to fetch thread' });
   }
 });

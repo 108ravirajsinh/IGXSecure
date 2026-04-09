@@ -1,18 +1,16 @@
-const express          = require('express');
-const router           = express.Router();
-const { decryptToken } = require('../utils/token');
+const express = require('express');
+const router  = express.Router();
 
-const IG_API = 'https://graph.instagram.com/v21.0';
-
-const getToken = (req) =>
-  req.session?.encryptedToken ? decryptToken(req.session.encryptedToken) : null;
+const IG_API  = 'https://graph.instagram.com/v21.0';
+const isDev   = process.env.NODE_ENV !== 'production';
 
 // GET /igxsecure/api/notifications
 router.get('/', async (req, res) => {
-  const accessToken = getToken(req);
+  const accessToken = req.accessToken;
   const userId      = req.session?.userId;
-  if (!accessToken || !userId)
+  if (!accessToken || !userId) {
     return res.status(401).json({ error: 'Not authenticated' });
+  }
 
   try {
     // Fetch recent media
@@ -25,7 +23,13 @@ router.get('/', async (req, res) => {
       `&access_token=${accessToken}`
     );
     const mediaData = await mediaRes.json();
-    if (mediaData.error) return res.status(400).json({ error: mediaData.error.message });
+
+    if (mediaData.error) {
+      if (isDev) {
+        console.warn('[NOTIFICATIONS] /me/media error:', mediaData.error);
+      }
+      return res.status(400).json({ error: mediaData.error.message });
+    }
 
     const notifications = [];
 
@@ -66,7 +70,7 @@ router.get('/', async (req, res) => {
     res.json({ notifications, total: notifications.length });
 
   } catch (err) {
-    console.error('[NOTIFICATIONS] Error:', err);
+    console.error('[NOTIFICATIONS] Error:', isDev ? err : err.message);
     res.status(500).json({ error: 'Failed to fetch notifications' });
   }
 });

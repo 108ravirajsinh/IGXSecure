@@ -6,10 +6,26 @@
 const crypto = require('crypto');
 const axios  = require('axios');
 
-const ALGORITHM  = 'aes-256-gcm';
-const SECRET_KEY = Buffer.from(
-  (process.env.TOKEN_SECRET || '').padEnd(32, '0').slice(0, 32)
-);
+const ALGORITHM = 'aes-256-gcm';
+
+// TOKEN_SECRET must be exactly 32 bytes. Fail fast if misconfigured.
+const raw = process.env.TOKEN_SECRET || '';
+
+let SECRET_KEY;
+if (raw.length === 64 && /^[0-9a-fA-F]+$/.test(raw)) {
+  // 64-char hex string → decoded to 32 bytes (most common from crypto.randomBytes)
+  SECRET_KEY = Buffer.from(raw, 'hex');
+} else if (raw.length === 32) {
+  // Exactly 32 plain characters → 32 bytes UTF-8
+  SECRET_KEY = Buffer.from(raw, 'utf8');
+} else {
+  throw new Error(
+    'TOKEN_SECRET must be either:\n' +
+    '  • Exactly 32 plain characters, OR\n' +
+    '  • A 64-character hex string (output of crypto.randomBytes(32).toString("hex"))\n' +
+    `  Current length: ${raw.length}`
+  );
+}
 
 /**
  * Encrypt a plain text token
