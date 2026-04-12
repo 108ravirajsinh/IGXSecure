@@ -9,7 +9,7 @@ const isProd = process.env.NODE_ENV === 'production';
 
 const pool = new Pool({
   host:     process.env.DB_HOST     || 'localhost',
-  port:     parseInt(process.env.DB_PORT || '5432', 10),
+  port:     parseInt(process.env.DB_PORT || '5433', 10),
   database: process.env.DB_NAME     || 'igxsecure',
   user:     process.env.DB_USER     || 'igxuser',
   password: process.env.DB_PASSWORD,

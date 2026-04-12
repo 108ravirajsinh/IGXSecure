@@ -68,12 +68,24 @@ app.use('/igxsecure/api/stories',        requireAuth, storiesRouter);
 app.use('/igxsecure/api/messages',       requireAuth, messagesRouter);
 app.use('/igxsecure/api/notifications',  requireAuth, notificationsRouter);
 
-/* ── Media Proxy (images + video streaming) ── */
+/* ── Media Proxy (images + video streaming) ── 
 const allowedMediaHosts = [
   'scontent.cdninstagram.com',
   'scontent.xx.fbcdn.net',
   'instagram.fdel1-1.fna.fbcdn.net', // adjust to your region as needed
-];
+];*/
+
+const extraAllowedHosts = (process.env.ALLOWED_MEDIA_HOSTS || '')
+  .split(',')
+  .map(h => h.trim())
+  .filter(Boolean);
+
+function isAllowedMediaHost(hostname) {
+  if (hostname.endsWith('.cdninstagram.com')) return true;
+  if (hostname.endsWith('.fbcdn.net'))        return true;
+  if (extraAllowedHosts.includes(hostname))   return true;
+  return false;
+}
 
 app.get('/igxsecure/api/proxy/image', requireAuth, (req, res) => {
   const { url } = req.query;
@@ -88,7 +100,8 @@ app.get('/igxsecure/api/proxy/image', requireAuth, (req, res) => {
     return res.status(400).json({ error: 'Invalid media URL' });
   }
 
-  if (!allowedMediaHosts.includes(target.hostname)) {
+  if (!isAllowedMediaHost(target.hostname)) {
+    console.warn(`[PROXY] Blocked host: ${target.hostname}`);
     return res.status(400).json({ error: 'Host not allowed' });
   }
 
