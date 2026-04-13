@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { apiBaseUrl } from '../config/api';
 
-function Settings({ userId, onLogout }) {
+function Settings({ userId, onLogout, onOpenPrivacy, onOpenTerms }) {
   const [loggingOut, setLoggingOut] = useState(false);
 
   const handleLogout = () => {
@@ -39,7 +39,6 @@ function Settings({ userId, onLogout }) {
       {/* ── Security Card ── */}
       <div className="settings-card">
         <div className="settings-card-label">Security</div>
-
         <div className="settings-row">
           <div className="settings-row-left">
             <div className="settings-icon">🔑</div>
@@ -50,9 +49,7 @@ function Settings({ userId, onLogout }) {
           </div>
           <div className="settings-badge settings-badge-green">Secure</div>
         </div>
-
         <div className="settings-divider" />
-
         <div className="settings-row">
           <div className="settings-row-left">
             <div className="settings-icon">🔄</div>
@@ -63,9 +60,7 @@ function Settings({ userId, onLogout }) {
           </div>
           <div className="settings-badge settings-badge-green">Active</div>
         </div>
-
         <div className="settings-divider" />
-
         <div className="settings-row">
           <div className="settings-row-left">
             <div className="settings-icon">🛡️</div>
@@ -76,9 +71,7 @@ function Settings({ userId, onLogout }) {
           </div>
           <div className="settings-badge settings-badge-green">None</div>
         </div>
-
         <div className="settings-divider" />
-
         <div className="settings-row">
           <div className="settings-row-left">
             <div className="settings-icon">🌐</div>
@@ -94,7 +87,6 @@ function Settings({ userId, onLogout }) {
       {/* ── About Card ── */}
       <div className="settings-card">
         <div className="settings-card-label">About</div>
-
         <div className="settings-row">
           <div className="settings-row-left">
             <div className="settings-icon">📦</div>
@@ -104,9 +96,7 @@ function Settings({ userId, onLogout }) {
             </div>
           </div>
         </div>
-
         <div className="settings-divider" />
-
         <div className="settings-row">
           <div className="settings-row-left">
             <div className="settings-icon">🖥️</div>
@@ -116,9 +106,7 @@ function Settings({ userId, onLogout }) {
             </div>
           </div>
         </div>
-
         <div className="settings-divider" />
-
         <div className="settings-row">
           <div className="settings-row-left">
             <div className="settings-icon">👤</div>
@@ -128,6 +116,41 @@ function Settings({ userId, onLogout }) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ── Legal Card (NEW) ── */}
+      <div className="settings-card">
+        <div className="settings-card-label">Legal</div>
+
+        <button className="settings-row settings-row-btn" onClick={onOpenPrivacy}>
+          <div className="settings-row-left">
+            <div className="settings-icon">🔒</div>
+            <div>
+              <div className="settings-row-title">Privacy Policy</div>
+              <div className="settings-row-value">How your data is collected, stored, and used</div>
+            </div>
+          </div>
+          <svg className="settings-row-chevron" width="16" height="16" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
+
+        <div className="settings-divider" />
+
+        <button className="settings-row settings-row-btn" onClick={onOpenTerms}>
+          <div className="settings-row-left">
+            <div className="settings-icon">📋</div>
+            <div>
+              <div className="settings-row-title">Terms of Use</div>
+              <div className="settings-row-value">Permitted use, prohibited actions, disclaimers</div>
+            </div>
+          </div>
+          <svg className="settings-row-chevron" width="16" height="16" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
       </div>
 
       {/* ── Danger Zone ── */}

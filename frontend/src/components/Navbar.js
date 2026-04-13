@@ -1,7 +1,7 @@
 // src/components/Navbar.js
 import React from 'react';
 
-const BOTTOM_NAV_ITEMS = [
+const NAV_ITEMS = [
   {
     id: 'feed',
     label: 'Feed',
@@ -49,8 +49,10 @@ const BOTTOM_NAV_ITEMS = [
 function Navbar({ userId, view, onViewChange }) {
   return (
     <>
-      {/* ── Top header — Brand + Alerts only ── */}
+      {/* ── Top header — visible on ALL screen sizes ── */}
       <header className="app-header">
+
+        {/* Brand (left) */}
         <div className="brand">
           <div className="brand-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -63,7 +65,27 @@ function Navbar({ userId, view, onViewChange }) {
           <span className="brand-name">IGX<span>Secure</span></span>
         </div>
 
-        {/* Alerts only in top header */}
+        {/* Desktop center nav — Feed / Messages / Settings (hidden on mobile) */}
+        <nav className="desktop-nav" aria-label="Main navigation">
+          {NAV_ITEMS.map(item => {
+            const active = view === item.id;
+            return (
+              <button
+                key={item.id}
+                className={`desktop-nav-btn ${active ? 'desktop-nav-btn-active' : ''}`}
+                onClick={() => onViewChange(item.id)}
+                aria-label={item.label}
+                aria-current={active ? 'page' : undefined}
+              >
+                {item.icon}
+                <span className="desktop-nav-label">{item.label}</span>
+                {active && <span className="desktop-nav-dot" aria-hidden="true" />}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Right — Alerts bell (always visible) */}
         <div className="nav-actions">
           <button
             className={`nav-icon-btn ${view === 'notifications' ? 'nav-icon-btn-active' : ''}`}
@@ -78,11 +100,12 @@ function Navbar({ userId, view, onViewChange }) {
             </svg>
           </button>
         </div>
+
       </header>
 
-      {/* ── Bottom nav — Feed, Messages, Settings only ── */}
+      {/* ── Bottom nav — mobile only (≤768px) ── */}
       <nav className="bottom-nav" aria-label="Main navigation">
-        {BOTTOM_NAV_ITEMS.map(item => {
+        {NAV_ITEMS.map(item => {
           const active = view === item.id;
           return (
             <button
