@@ -32,7 +32,7 @@ services:
       - ALLOWED_ORIGIN=http://localhost
       - TOKEN_SECRET=change_this_to_a_32_char_secret!!
       - DB_HOST=postgres
-      - DB_PORT=5432
+      - DB_PORT=5433
       - DB_NAME=igxsecure
       - DB_USER=igxuser
       - DB_PASSWORD=changeme_strong_password
