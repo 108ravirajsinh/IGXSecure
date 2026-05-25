@@ -1,28 +1,27 @@
-// frontend/src/components/AppNav.js
 import React from 'react';
-import { NavLink } from 'react-router-dom';
 import { Grid, MessageSquare, Settings } from 'lucide-react';
 
 const navItems = [
-  { to: '/feed',     icon: Grid,          label: 'Feed'     },
-  { to: '/messages', icon: MessageSquare, label: 'Messages' },
-  { to: '/settings', icon: Settings,      label: 'Settings' },
+  { view: 'feed', icon: Grid, label: 'Feed' },
+  { view: 'messages', icon: MessageSquare, label: 'Messages' },
+  { view: 'settings', icon: Settings, label: 'Settings' },
 ];
 
-function AppNav() {
+function AppNav({ activeView, onNavigate }) {
   return (
     <nav className="app-nav" aria-label="Main navigation">
-      {navItems.map(({ to, icon: Icon, label }) => (
-        <NavLink
-          key={to}
-          to={to}
-          className={({ isActive }) =>
-            'app-nav__item' + (isActive ? ' app-nav__item--active' : '')
-          }
+      {navItems.map(({ view, icon: Icon, label }) => (
+        <button
+          key={view}
+          type="button"
+          className={`app-nav__item${activeView === view ? ' app-nav__item--active' : ''}`}
+          onClick={() => onNavigate(view)}
+          aria-label={label}
+          aria-current={activeView === view ? 'page' : undefined}
         >
           <Icon size={22} className="app-nav__icon" />
           <span className="app-nav__label">{label}</span>
-        </NavLink>
+        </button>
       ))}
     </nav>
   );

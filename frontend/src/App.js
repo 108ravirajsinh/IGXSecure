@@ -138,7 +138,7 @@ function App() {
   return (
     <div className="app">
        <div className="app-shell">
-      <Header notifCount={notifCount} />
+      <Header notifCount={0} />
       <div className="app-body">
         <AppNav />          
 
