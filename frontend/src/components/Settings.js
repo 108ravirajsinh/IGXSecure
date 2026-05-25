@@ -5,12 +5,17 @@ import { apiBaseUrl } from '../config/api';
 function Settings({ userId, onLogout, onOpenPrivacy, onOpenTerms }) {
   const [loggingOut, setLoggingOut] = useState(false);
 
+  //const handleLogout = () => {
+    //setLoggingOut(true);
+    //fetch(`${apiBaseUrl}/auth/logout`, { method: 'POST', credentials: 'include' })
+      //.then(() => onLogout())
+      //.catch(() => onLogout());
+  //};
+  // Settings.js — simplify to:
   const handleLogout = () => {
-    setLoggingOut(true);
-    fetch(`${apiBaseUrl}/auth/logout`, { method: 'POST', credentials: 'include' })
-      .then(() => onLogout())
-      .catch(() => onLogout());
-  };
+  setLoggingOut(true);
+  onLogout();
+};
 
   return (
     <div className="settings-wrap">

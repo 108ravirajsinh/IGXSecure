@@ -158,5 +158,6 @@ router.post('/refresh', async (req, res) => {
     console.error('[AUTH] Token refresh failed:', err.response?.data || err.message);
     res.status(500).json({ error: 'Token refresh failed' });
   }
+  
 });
 module.exports = router;

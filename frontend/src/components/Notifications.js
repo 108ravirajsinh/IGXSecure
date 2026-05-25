@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-
-const API = process.env.REACT_APP_API_BASE || '';
+import { apiBaseUrl } from '../config/api';
+//const API = process.env.REACT_APP_API_BASE || '';
 
 const TYPE_ICON = {
   like: (

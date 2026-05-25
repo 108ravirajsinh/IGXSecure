@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-
-const API = process.env.REACT_APP_API_BASE || '';
+import { apiBaseUrl } from '../config/api';
+//const API = process.env.REACT_APP_API_BASE || '';
 
 function Stories() {
   const [stories, setStories]   = useState([]);
@@ -118,7 +118,7 @@ function Stories() {
             <div className="story-ring">
               <div className="story-bubble">
                 <img
-                  src={`/igxsecure/api/proxy/image?url=${encodeURIComponent(
+                  src={`$API}/igxsecure/api/proxy/image?url=${encodeURIComponent(
                     story.thumbnail_url || story.media_url)}`}
                   alt="story"
                   className="story-thumb"
@@ -171,7 +171,7 @@ function Stories() {
                      autoPlay muted playsInline />
             ) : (
               <img
-                src={`/igxsecure/api/proxy/image?url=${encodeURIComponent(
+                src={`${API}/igxsecure/api/proxy/image?url=${encodeURIComponent(
                   selected.media_url)}`}
                 alt="story"
                 className="story-modal-media"

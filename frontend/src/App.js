@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import AppNav from './components/AppNav';
 import Header from './components/Header';
-import Navbar        from './components/Navbar';
 import Stories       from './components/Stories';
 import PostList      from './components/PostList';
 import Settings      from './components/Settings';
