@@ -16,7 +16,7 @@ function Stories() {
   fetch(`${apiBaseUrl}/igxsecure/api/stories/insights`, { credentials: 'include' })
     .then(async r => {
       if (r.status === 401) {
-        fetch(`${apiBaseUrl}/igxsecure/api/stories`, { credentials: 'include' });
+        const basic = await fetch(`${apiBaseUrl}/igxsecure/api/stories`, { credentials: 'include' });
         const data = await basic.json();
         const stories = (data.data || []).map(s => ({
           ...s,
@@ -171,7 +171,7 @@ function Stories() {
                      autoPlay muted playsInline />
             ) : (
               <img
-                src={`${API}/igxsecure/api/proxy/image?url=${encodeURIComponent(
+                src={`${apiBaseUrl}/igxsecure/api/proxy/image?url=${encodeURIComponent(
                   selected.media_url)}`}
                 alt="story"
                 className="story-modal-media"
