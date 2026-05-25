@@ -13,10 +13,10 @@ function Stories() {
   const STORY_DURATION          = 5000; // ms per story
 
   useEffect(() => {
-  fetch(`${API}/igxsecure/api/stories/insights`, { credentials: 'include' })
+  fetch(`${apiBaseUrl}/igxsecure/api/stories/insights`, { credentials: 'include' })
     .then(async r => {
       if (r.status === 401) {
-        const basic = await fetch(`${API}/igxsecure/api/stories`, { credentials: 'include' });
+        fetch(`${apiBaseUrl}/igxsecure/api/stories`, { credentials: 'include' });
         const data = await basic.json();
         const stories = (data.data || []).map(s => ({
           ...s,
@@ -118,7 +118,7 @@ function Stories() {
             <div className="story-ring">
               <div className="story-bubble">
                 <img
-                  src={`$API}/igxsecure/api/proxy/image?url=${encodeURIComponent(
+                  src={`${apiBaseUrl}/igxsecure/api/proxy/image?url=${encodeURIComponent(
                     story.thumbnail_url || story.media_url)}`}
                   alt="story"
                   className="story-thumb"

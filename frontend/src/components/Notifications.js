@@ -34,7 +34,7 @@ function Notifications() {
   const [filter, setFilter]               = useState('all');
 
   useEffect(() => {
-    fetch(`${API}/igxsecure/api/notifications`, { credentials: 'include' })
+    fetch(`${apiBaseUrl}/igxsecure/api/notifications`, { credentials: 'include' })
       .then(r => r.json())
       .then(data => {
         if (data.error) setError(data.error);
@@ -124,7 +124,7 @@ function Notifications() {
               {/* Post thumbnail */}
               {n.postThumb && (
                 <img
-                  src={`/igxsecure/api/proxy/image?url=${encodeURIComponent(n.postThumb)}`}
+                  src={`${apiBaseUrl}/igxsecure/api/proxy/image?url=${encodeURIComponent(n.postThumb)}`}
                   alt="post"
                   className="notif-thumb"
                 />

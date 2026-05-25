@@ -31,7 +31,6 @@ function LightboxPortal({ children }) {
     };
   }, [el]);
 
-  const ReactDOM = require('react-dom');
   return ReactDOM.createPortal(children, el);
 }
 
