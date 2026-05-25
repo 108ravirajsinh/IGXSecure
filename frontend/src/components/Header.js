@@ -2,7 +2,7 @@
 import React from 'react';
 import { Bell } from 'lucide-react';
 
-function Header({ notifCount }) {
+function Header({ notifCount, onNavigate }) {
   return (
     <header className="app-header">
       <div className="header-brand">

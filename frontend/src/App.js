@@ -26,6 +26,18 @@ function App() {
       .catch(() => setAuth({ loading: false, authenticated: false, userId: null }));
   }, []);
 
+  // Token expiry warning + auto-refresh
+  useEffect(() => {
+  if (!auth.authenticated || !auth.expiresAt) return;
+
+  const msLeft = new Date(auth.expiresAt) - Date.now();
+  const daysLeft = Math.floor(msLeft / (1000 * 60 * 60 * 24));
+  const [tokenWarning, setTokenWarning] = useState(null);
+  if (daysLeft <= 7) {
+    setTokenWarning(daysLeft);
+  }
+  }, [auth]);
+
   const isLoggingOutRef = useRef(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -139,6 +151,23 @@ function App() {
     <div className="app">
        <div className="app-shell">
       <Header notifCount={0} onNavigate={setView} />
+      {tokenWarning !== null && (
+  <div className="token-warning-bar">
+    <span>
+      ⚠️ Your session {tokenWarning <= 0 ? 'has expired' : `expires in ${tokenWarning} day${tokenWarning === 1 ? '' : 's'}`}.
+    </span>
+    <button
+      className="token-warning-refresh"
+      onClick={async () => {
+        const r = await fetch('/igxsecure/api/auth/refresh', { method: 'POST', credentials: 'include' });
+        if (r.ok) setTokenWarning(null);
+        else window.location.href = '/igxsecure/api/auth/login';
+      }}
+    >
+      Renew Session
+    </button>
+  </div>
+)}
       <div className="app-body">
         <AppNav activeView={view} onNavigate={setView} />        
 

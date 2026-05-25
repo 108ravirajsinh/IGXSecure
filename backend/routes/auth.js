@@ -125,5 +125,38 @@ router.post('/logout', (req, res) => {
     res.json({ success: true, message: 'Logged out successfully' });
   });
 });
+ // ── POST /igxsecure/api/auth/refresh ──────────────────────────
+// Refreshes long-lived token (call when < 7 days to expiry)
+router.post('/refresh', async (req, res) => {
+  if (!req.session?.encryptedToken) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
 
+  try {
+    const currentToken = decryptToken(req.session.encryptedToken);
+
+    const refreshRes = await axios.get('https://graph.instagram.com/refresh_access_token', {
+      params: {
+        grant_type:   'ig_refresh_token',
+        access_token: currentToken,
+      },
+    });
+
+    const newToken   = refreshRes.data.access_token;
+    const expiresIn  = refreshRes.data.expires_in;
+
+    req.session.encryptedToken = encryptToken(newToken);
+    req.session.tokenExpiresAt = Date.now() + (expiresIn * 1000);
+
+    console.log(`[AUTH] Token refreshed — user: ${req.session.userId}`);
+    res.json({
+      success:   true,
+      expiresAt: new Date(req.session.tokenExpiresAt).toISOString(),
+    });
+
+  } catch (err) {
+    console.error('[AUTH] Token refresh failed:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Token refresh failed' });
+  }
+});
 module.exports = router;
