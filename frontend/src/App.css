@@ -361,6 +361,7 @@ input, textarea, select { font: inherit; color: inherit; }
   display: flex;
   flex: 1;
   overflow: hidden;
+  min-height: 0;
 }
 
 .app-header h1 {
@@ -381,7 +382,7 @@ input, textarea, select { font: inherit; color: inherit; }
   flex-direction: column;        /* vertical stack */
   align-items: center;
   gap: var(--sp-2);
-  width: 72px;
+  width: 80px;
   padding: var(--sp-4) 0;
   background: var(--surface);
   border-left: 1px solid var(--border);
@@ -390,10 +391,16 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 
 .app-main {
- flex: 1;
+  flex: 1;
+  min-width: 0;
   overflow-y: auto;
   order: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;        /* ← centers feed horizontally */
+  padding: var(--sp-4) var(--sp-4) var(--sp-6);
 }
+
 .app-nav__item {
   display: flex;
   flex-direction: column;
@@ -662,7 +669,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .feed,
 .feed-wrapper {
   width: 100%;
-  max-width: 520px;
+  max-width: 560px;
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);

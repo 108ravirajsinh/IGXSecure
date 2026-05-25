@@ -14,7 +14,11 @@ function Header({ notifCount }) {
         </svg>
         <span className="brand-name">IGXSecure</span>
       </div>
-      <button className="notif-btn" aria-label="Notifications">
+        <button
+            className="notif-btn"
+            aria-label="Notifications"
+            onClick={() => onNavigate('notifications')}
+          >
         <Bell size={20} />
         {notifCount > 0 && <span className="notif-badge">{notifCount}</span>}
       </button>

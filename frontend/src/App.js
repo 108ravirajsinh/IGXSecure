@@ -138,9 +138,9 @@ function App() {
   return (
     <div className="app">
        <div className="app-shell">
-      <Header notifCount={0} />
+      <Header notifCount={0} onNavigate={setView} />
       <div className="app-body">
-        <AppNav />          
+        <AppNav activeView={view} onNavigate={setView} />        
 
             <main className="app-main">
               {view === 'feed' && (
