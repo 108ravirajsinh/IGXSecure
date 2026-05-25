@@ -16,26 +16,28 @@ import './App.css';
 function App() {
   const [auth, setAuth] = useState({ loading: true, authenticated: false, userId: null });
   const [view, setView] = useState('feed');
-  // remembers which view to return to after closing a legal page
   const [legalReturnView, setLegalReturnView] = useState('feed');
+  const [tokenWarning, setTokenWarning] = useState(null);  // ← MOVE HERE, top-level
 
+  // Auth status check
   useEffect(() => {
     fetch(`${apiBaseUrl}/auth/status`, { credentials: 'include' })
       .then(r => r.json())
-      .then(d => setAuth({ loading: false, authenticated: d.authenticated, userId: d.userId }))
+      .then(d => setAuth({
+        loading: false,
+        authenticated: d.authenticated,
+        userId: d.userId,
+        expiresAt: d.expiresAt   // ← also save expiresAt
+      }))
       .catch(() => setAuth({ loading: false, authenticated: false, userId: null }));
   }, []);
 
-  // Token expiry warning + auto-refresh
+  // Token expiry warning
   useEffect(() => {
-  if (!auth.authenticated || !auth.expiresAt) return;
-
-  const msLeft = new Date(auth.expiresAt) - Date.now();
-  const daysLeft = Math.floor(msLeft / (1000 * 60 * 60 * 24));
-  const [tokenWarning, setTokenWarning] = useState(null);
-  if (daysLeft <= 7) {
-    setTokenWarning(daysLeft);
-  }
+    if (!auth.authenticated || !auth.expiresAt) return;
+    const msLeft = new Date(auth.expiresAt) - Date.now();
+    const daysLeft = Math.floor(msLeft / (1000 * 60 * 60 * 24));
+    if (daysLeft <= 7) setTokenWarning(daysLeft);
   }, [auth]);
 
   const isLoggingOutRef = useRef(false);
